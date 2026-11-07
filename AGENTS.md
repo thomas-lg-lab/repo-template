@@ -9,7 +9,7 @@
   tag, from the draft release) builds `latest`.
 - **PR titles follow Conventional Commits** with a type from `.github/conventional-commit-types.json`
   (checked by CI, and the label and release notes come from it).
-- **Dependencies** are updated by Renovate (shared config in `thomas-lg/renovate-config`); do not
+- **Dependencies** are updated by Renovate (shared config in `thomas-lg-lab/renovate-config`); do not
   bump them by hand in a feature PR. Security fixes arrive as `security` PRs at any time.
 - **Supply chain.** Actions are pinned to commit SHAs and images to digests; keep it that way when
   adding one (Renovate keeps them current).
