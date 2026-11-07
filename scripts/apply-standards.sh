@@ -1,6 +1,6 @@
 #!/bin/sh
-# Applies the repository settings a template cannot carry: merge options, security features and
-# the main ruleset (.github/rulesets/main.json). Idempotent: run it once after "Use this
+# Applies the repository settings a template cannot carry: merge options, security features, the
+# hermes-triage topic and the main ruleset (.github/rulesets/main.json). Idempotent: run it once after "Use this
 # template", and again after editing the ruleset file.
 #
 # Usage: scripts/apply-standards.sh owner/repo
@@ -27,6 +27,11 @@ echo "Security: secret scanning and push protection"
 gh api -X PATCH "repos/$REPO" --input - >/dev/null <<'EOF'
 {"security_and_analysis": {"secret_scanning": {"status": "enabled"}, "secret_scanning_push_protection": {"status": "enabled"}}}
 EOF
+
+# Enrols the repository in Hermes' PR triage (pr-triage skill, homelab repository): on the personal
+# account only repositories with this topic are triaged. Remove it to opt out.
+echo "Topic: hermes-triage"
+gh repo edit "$REPO" --add-topic hermes-triage >/dev/null
 
 NAME="$(sed -n 's/.*"name": *"\([^"]*\)".*/\1/p' "$RULESET_FILE" | head -n 1)"
 ID="$(gh api "repos/$REPO/rulesets" --jq ".[] | select(.name == \"$NAME\") | .id")"
