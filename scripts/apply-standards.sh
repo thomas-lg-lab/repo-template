@@ -9,7 +9,7 @@
 #
 # Then, by hand (the API cannot do it for a personal account):
 #   - install the thomas-lg-renovate App on the repository (Settings > GitHub Apps), which enrols
-#     it in the central Renovate runner of thomas-lg/renovate-config;
+#     it in the central Renovate runner of thomas-lg-lab/renovate-config;
 #   - add the project's own CI job names to required_status_checks in the ruleset file.
 
 set -eu
