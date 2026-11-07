@@ -1,7 +1,8 @@
 # Builds the Docker image on every PR (no push), and publishes it to GHCR.
 # Merging is not releasing:
 #   - a push to main publishes :edge and :sha-<short>
-#   - a version tag v* (a published release) publishes :latest and :X.Y.Z / :X.Y / :X
+#   - a version tag v* (a published release) publishes :X.Y.Z / :X.Y / :X, and :latest unless it is a
+#     pre-release (metadata-action's latest=auto)
 # A tag pushed by a person triggers `push`; a release published by draft-release.yml creates its
 # tag with GITHUB_TOKEN, which starts no workflow, so that job dispatches this one on the tag.
 #
@@ -41,40 +42,32 @@ jobs:
       - id: check
         run: echo "dockerfile=$([ -f Dockerfile ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
 
+  # The gate every event runs, PRs included: build amd64, load it, scan it. Read-only token: a pull request (Renovate's
+  # included, whose branches live in this repository) never gets a registry or OIDC write scope.
   docker-build:
     needs: detect
     if: needs.detect.outputs.dockerfile == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: write
-      id-token: write # OIDC token for the build-provenance attestation
-      attestations: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
-      - if: github.event_name != 'pull_request'
-        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
       - id: meta
         uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6
         with:
           images: ${{ env.IMAGE }}
+          flavor: latest=auto
           tags: |
             type=raw,value=edge,enable=${{ github.ref == 'refs/heads/main' }}
-            type=raw,value=latest,enable=${{ startsWith(github.ref, 'refs/tags/v') }}
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
             type=sha,prefix=sha-,format=short,enable=${{ github.event_name != 'pull_request' }}
             type=ref,event=pr
-      # Build once, load it, and gate on it before anything is pushed. amd64 only here: `load`
-      # takes one platform, and both architectures install the same packages.
+      # amd64 only here: `load` takes one platform, and both architectures install the same packages.
       - name: Build (no push)
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
         with:
@@ -97,8 +90,41 @@ jobs:
           exit-code: "1"
           severity: CRITICAL
           ignore-unfixed: true
+
+  # Only pushes to main, v* tags and manual runs publish, once the gate above has passed. This is the only job
+  # holding packages / id-token / attestations write.
+  publish:
+    needs: [detect, docker-build]
+    if: needs.detect.outputs.dockerfile == 'true' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write # OIDC token for the build-provenance attestation
+      attestations: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - id: meta
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6
+        with:
+          images: ${{ env.IMAGE }}
+          flavor: latest=auto
+          tags: |
+            type=raw,value=edge,enable=${{ github.ref == 'refs/heads/main' }}
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=sha,prefix=sha-,format=short,enable=${{ github.event_name != 'pull_request' }}
+            type=ref,event=pr
       - id: push
-        if: github.event_name != 'pull_request'
         name: Push (amd64 + arm64)
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
         with:
@@ -109,8 +135,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
       # Verifiable with: gh attestation verify oci://ghcr.io/<owner>/<repo>:<tag> --owner <owner>
-      - if: github.event_name != 'pull_request'
-        name: Attest build provenance
+      - name: Attest build provenance
         uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4
         with:
           subject-name: ${{ env.IMAGE }}
