@@ -19,7 +19,7 @@ ready from the first commit. Use it with **Use this template** on GitHub, or
 ## After creating a repository from it
 
 1. `scripts/apply-standards.sh thomas-lg/<name>`: merge settings, secret scanning and push
-   protection, the main ruleset.
+   protection, the `hermes-triage` topic (Hermes triages the repository's PRs), the main ruleset.
 2. Install the `thomas-lg-renovate` App on the repository (Settings → GitHub Apps → Configure): the
    central runner picks it up on its next run.
 3. Add the project's CI (build, tests, lint) and its job names to `required_status_checks` in
