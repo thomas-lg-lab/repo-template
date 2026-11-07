@@ -14,12 +14,13 @@ ready from the first commit. Use it with **Use this template** on GitHub, or
 | Dependencies | Renovate through the central runner and shared preset of `thomas-lg/renovate-config` (OSV security PRs, SHAs and digests pinned, 3-day release age) |
 | Image | `image.yml`: build on every PR, Trivy gate on fixable criticals, multi-arch push, build provenance attestation |
 | Supply chain | OpenSSF Scorecard (Security tab and badge), actions pinned to SHAs, `permissions` least-privilege |
-| Protection | `.github/rulesets/main.json`: squash only, linear history, required checks, no bypass |
+| Protection | `.github/rulesets/main.json`: squash only, linear history, signed commits, required checks, no bypass |
 
 ## After creating a repository from it
 
-1. `scripts/apply-standards.sh thomas-lg/<name>`: merge settings, secret scanning and push
-   protection, the `hermes-triage` topic (Hermes triages the repository's PRs), the main ruleset.
+1. `scripts/apply-standards.sh thomas-lg/<name>`: merge settings, secret scanning, push protection
+   and private vulnerability reporting, the `hermes-triage` topic (Hermes triages the repository's
+   PRs), the main ruleset.
 2. Install the `thomas-lg-renovate` App on the repository (Settings → GitHub Apps → Configure): the
    central runner picks it up on its next run.
 3. Add the project's CI (build, tests, lint) and its job names to `required_status_checks` in

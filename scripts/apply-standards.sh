@@ -1,7 +1,8 @@
 #!/bin/sh
-# Applies the repository settings a template cannot carry: merge options, security features, the
-# hermes-triage topic and the main ruleset (.github/rulesets/main.json). Idempotent: run it once after "Use this
-# template", and again after editing the ruleset file.
+# Applies the repository settings a template cannot carry: merge options, security features (secret
+# scanning, push protection, private vulnerability reporting), the hermes-triage topic and the main
+# ruleset (.github/rulesets/main.json). Idempotent: run it once after "Use this template", and again
+# after editing the ruleset file.
 #
 # Usage: scripts/apply-standards.sh owner/repo
 # Needs: gh, logged in as the repository owner (admin rights on the repository).
@@ -20,13 +21,16 @@ echo "Settings: squash only, branches deleted on merge, auto-merge allowed"
 gh api -X PATCH "repos/$REPO" \
     -F allow_squash_merge=true -F allow_merge_commit=false -F allow_rebase_merge=false \
     -F delete_branch_on_merge=true -F allow_auto_merge=true \
-    -f squash_merge_commit_title=PR_TITLE -f squash_merge_commit_message=PR_BODY \
+    -f squash_merge_commit_title=PR_TITLE -f squash_merge_commit_message=COMMIT_MESSAGES \
     -F has_wiki=false -F has_projects=false >/dev/null
 
 echo "Security: secret scanning and push protection"
 gh api -X PATCH "repos/$REPO" --input - >/dev/null <<'EOF'
 {"security_and_analysis": {"secret_scanning": {"status": "enabled"}, "secret_scanning_push_protection": {"status": "enabled"}}}
 EOF
+
+echo "Security: private vulnerability reporting (the channel SECURITY.md points to)"
+gh api -X PUT "repos/$REPO/private-vulnerability-reporting" >/dev/null
 
 # Enrols the repository in Hermes' PR triage (pr-triage skill, homelab repository): on the personal
 # account only repositories with this topic are triaged. Remove it to opt out.

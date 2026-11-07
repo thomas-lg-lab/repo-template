@@ -1,5 +1,8 @@
 # Automatically applies a label to a PR based on its conventional commit prefix (e.g. feat: → feature).
 # Type→label mapping is defined in .github/conventional-commit-types.json (shared with the title-check workflow).
+#
+# Only the label of the previous title's type is removed when the title changes: labels added by someone else
+# (Renovate's `security` on vulnerability fixes, `github-actions` on action bumps, a label set by hand) stay.
 name: Label PR from Conventional Commit
 
 on:
@@ -16,20 +19,45 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      - name: Read conventional commit types config
-        id: type-config
-        run: |
-          if [ ! -f .github/conventional-commit-types.json ]; then
-            echo "::error::Missing .github/conventional-commit-types.json" && exit 1
-          fi
-          jq -c . .github/conventional-commit-types.json > /dev/null \
-            || { echo "::error::.github/conventional-commit-types.json is not valid JSON" && exit 1; }
-          echo "types=$(jq -c . .github/conventional-commit-types.json)" >> "$GITHUB_OUTPUT"
+        with:
+          persist-credentials: false
 
       - name: Apply label from PR title prefix
-        uses: bcoe/conventional-release-labels@886f696738527c7be444262c327c89436dfb95a8 # v1
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          type_labels: ${{ steps.type-config.outputs.types }}
-          ignored_types: "[]"
+          script: |
+            const fs = require('fs');
+            let typeMap;
+            try {
+              typeMap = JSON.parse(fs.readFileSync('.github/conventional-commit-types.json', 'utf8'));
+            } catch (e) {
+              core.setFailed(`Failed to load .github/conventional-commit-types.json: ${e.message}`);
+              return;
+            }
+
+            // Labels for a title: the type's label, plus `breaking` for `type!:`.
+            const pattern = /^(\w+)(\([^)]*\))?(!)?: /;
+            const labelsFor = (title) => {
+              const m = pattern.exec(title || '');
+              if (!m || !typeMap[m[1]]) return [];
+              const labels = [typeMap[m[1]]];
+              if (m[3] && typeMap.breaking) labels.push(typeMap.breaking);
+              return labels;
+            };
+
+            const pr = context.payload.pull_request;
+            const wanted = labelsFor(pr.title);
+            const previous = labelsFor(context.payload.changes?.title?.from);
+            const stale = previous.filter((l) => !wanted.includes(l));
+
+            for (const name of stale) {
+              try {
+                await github.rest.issues.removeLabel({ ...context.repo, issue_number: pr.number, name });
+              } catch (e) {
+                if (e.status !== 404) throw e;
+              }
+            }
+            if (wanted.length) {
+              await github.rest.issues.addLabels({ ...context.repo, issue_number: pr.number, labels: wanted });
+            }
+            core.info(`Labels added: ${wanted.join(', ') || 'none'}; removed: ${stale.join(', ') || 'none'}`);
