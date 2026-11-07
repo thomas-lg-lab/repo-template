@@ -2,6 +2,9 @@
 
 - **Trunk-based.** `main` is the only long-lived branch. Work on a short-lived branch and open one
   PR into `main`; it is squash-merged once the required checks pass. Never push to `main`.
+- **Signed commits.** The ruleset requires a verified signature on every commit of a PR, not only
+  on the squash commit: sign with an SSH or GPG key registered on GitHub as a signing key. Commits
+  made through the GitHub API or web UI (Renovate, the merge button) are signed by GitHub.
 - **Merging is not releasing.** `main` builds the `edge` image; only a published release (a `v*`
   tag, from the draft release) builds `latest`.
 - **PR titles follow Conventional Commits** with a type from `.github/conventional-commit-types.json`
