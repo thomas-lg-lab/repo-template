@@ -1,6 +1,6 @@
 #!/bin/sh
 # Applies the repository settings a template cannot carry: merge options, security features (secret
-# scanning, push protection, private vulnerability reporting), the hermes-triage topic and the main
+# scanning, push protection, private vulnerability reporting, Dependabot alerts) and the main
 # ruleset (.github/rulesets/main.json). Idempotent: run it once after "Use this template", and again
 # after editing the ruleset file.
 #
@@ -36,11 +36,6 @@ gh api -X PUT "repos/$REPO/private-vulnerability-reporting" >/dev/null
 # The alerts feed Renovate's vulnerabilityAlerts and the Security tab (review of 8 November 2026).
 echo "Security: Dependabot alerts"
 gh api -X PUT "repos/$REPO/vulnerability-alerts" >/dev/null
-
-# Enrols the repository in Hermes' PR triage (pr-triage skill, homelab repository): on the personal
-# account only repositories with this topic are triaged. Remove it to opt out.
-echo "Topic: hermes-triage"
-gh repo edit "$REPO" --add-topic hermes-triage >/dev/null
 
 NAME="$(sed -n 's/.*"name": *"\([^"]*\)".*/\1/p' "$RULESET_FILE" | head -n 1)"
 ID="$(gh api "repos/$REPO/rulesets" --jq ".[] | select(.name == \"$NAME\") | .id")"

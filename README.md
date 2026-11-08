@@ -19,8 +19,7 @@ ready from the first commit. Use it with **Use this template** on GitHub, or
 ## After creating a repository from it
 
 1. `scripts/apply-standards.sh thomas-lg-lab/<name>`: merge settings, secret scanning, push protection
-   and private vulnerability reporting, the `hermes-triage` topic (Hermes triages the repository's
-   PRs), the main ruleset.
+   and private vulnerability reporting, Dependabot alerts, the main ruleset.
 2. Nothing for Renovate: the `thomas-lg-renovate` App is installed on every repository of the
    organisation, so the central runner picks the new one up on its next run.
 3. Add the project's CI (build, tests, lint) and its job names to `required_status_checks` in
@@ -31,6 +30,3 @@ ready from the first commit. Use it with **Use this template** on GitHub, or
 ```markdown
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/thomas-lg-lab/<name>/badge)](https://scorecard.dev/viewer/?uri=github.com/thomas-lg-lab/<name>)
 ```
-
-The reasons behind each choice are written up in the homelab repository
-(`procedures/github-standards.md`).
