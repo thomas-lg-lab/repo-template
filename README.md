@@ -1,33 +1,36 @@
 # repo-template
 
-Template for new `thomas-lg-lab` repositories: the standards digestarr and coffee-tracker follow,
+Template for new `thomas-lg-lab` repositories: exactly the files every repository of the organisation carries,
 ready from the first commit. Use it with **Use this template** on GitHub, or
 `gh repo create thomas-lg-lab/<name> --template thomas-lg-lab/repo-template --public --clone`.
 
+The organisation drives the rest from [`thomas-lg-lab/.github`](https://github.com/thomas-lg-lab/.github): issue
+forms, PR template, SECURITY.md and code of conduct defaults, the shared workflows, the Release Drafter
+configuration and the settings script.
+
 ## What you get
 
-| Area | In this template |
+| File | Role |
 | --- | --- |
-| Branching | Trunk-based: short branches, squash PRs into `main` ([AGENTS.md](AGENTS.md)) |
-| Releases | release-drafter keeps a draft from PR labels; publishing it tags `vX.Y.Z` and builds `latest`; `main` builds `edge` |
-| PR hygiene | Conventional Commit titles enforced, labels from the type, CODEOWNERS |
-| Issues and PR template | Inherited from the organisation's defaults (`thomas-lg-lab/.github`): issue forms setting the issue type, PR template; do not add copies here |
-| Dependencies | Renovate through the central runner and shared preset of `thomas-lg-lab/renovate-config` (OSV security PRs, SHAs and digests pinned, 3-day release age) |
-| Image | `image.yml`: build on every PR, Trivy gate on fixable criticals, multi-arch push, build provenance attestation |
-| Supply chain | OpenSSF Scorecard (Security tab and badge), actions pinned to SHAs, `permissions` least-privilege |
-| Protection | `.github/rulesets/main.json`: squash only, linear history, signed commits, required checks, no bypass. `.github/rulesets/code-owner-review.json` + `CODEOWNERS`: a change to `.github/` (the checks themselves) needs my approval |
+| `.github/workflows/pull-request.yml` | Conventional Commit PR title (required check) and label, shared workflow |
+| `.github/workflows/ci.yml` | The project's checks, then the shared image build: Trivy gate on PRs, `edge` and `sha-*` from main, `X.Y.Z` and `latest` from a release |
+| `.github/workflows/release-drafter.yml` | Draft release from the merged PRs; a manual run publishes it and builds the release image |
+| `.github/workflows/registry-cleanup.yml` | Weekly pruning of old `sha-*` images |
+| `.github/workflows/scorecard.yml` | OpenSSF Scorecard (Security tab and badge) |
+| `.github/rulesets/` | `Protect main` (squash only, linear history, signed commits, required checks, CodeQL results, no bypass) and `Code owner review` (changes under `.github/`) |
+| `.github/CODEOWNERS`, `renovate.json`, `LICENSE`, `SECURITY.md`, `AGENTS.md`, `.editorconfig`, `.gitattributes` | Per repository by nature; `renovate.json` extends the shared preset of `thomas-lg-lab/renovate-config` |
 
 ## After creating a repository from it
 
-1. `scripts/apply-standards.sh thomas-lg-lab/<name>`: merge settings, secret scanning, push protection
-   and private vulnerability reporting, Dependabot alerts, the main ruleset.
-2. Nothing for Renovate: the `thomas-lg-renovate` App is installed on every repository of the
-   organisation, so the central runner picks the new one up on its next run.
-3. Add the project's CI (build, tests, lint) and its job names to `required_status_checks` in
-   `.github/rulesets/main.json`, then run the script again. Delete `image.yml` (and `docker-build`
-   from the ruleset) if the project ships no image.
-   Write the local check commands in a CONTRIBUTING.md: the organisation's PR template points there.
-4. Replace this README, keep the badges:
+1. Replace the `checks` job of `ci.yml` with the project's build, tests and lint; list their job names in `needs`
+   of `image` and in `required_status_checks` of `.github/rulesets/main.json`. Without an image, delete the
+   `image` job, `image / build` from the ruleset and `registry-cleanup.yml`.
+2. From the root of the new clone, with the organisation's `.github` repository cloned next to it:
+   `../.github/scripts/apply-standards.sh thomas-lg-lab/<name>` (settings, security features, CodeQL default
+   setup, labels, rulesets). Run it again after editing a ruleset file.
+3. Write the local check commands in a CONTRIBUTING.md (the organisation's PR template points there), and the
+   project's specifics in `AGENTS.md`. Renovate needs nothing: the organisation's App covers every repository.
+4. Replace this README, keep the badge:
 
 ```markdown
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/thomas-lg-lab/<name>/badge)](https://scorecard.dev/viewer/?uri=github.com/thomas-lg-lab/<name>)
