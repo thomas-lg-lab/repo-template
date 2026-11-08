@@ -7,8 +7,10 @@
   made through the GitHub API or web UI (Renovate, the merge button) are signed by GitHub.
 - **Merging is not releasing.** `main` builds the `edge` image; only a published release (a `v*`
   tag, from the draft release) builds `latest`.
-- **PR titles follow Conventional Commits** with a type from `.github/conventional-commit-types.json`
-  (checked by CI, and the label and release notes come from it).
+- **Shared workflows.** PR conventions, release notes, the image build and registry cleanup call the reusable
+  workflows of `thomas-lg-lab/.github` at a version tag; change them there, not here.
+- **PR titles follow Conventional Commits** (`type(scope): summary`, commitlint types, `!` for a breaking
+  change): checked by the required `conventions / title` check; the label and the release notes come from it.
 - **Issues and PR descriptions** follow the organisation's defaults in `thomas-lg-lab/.github`
   (issue forms, PR template, and how to fill them in its README); they are not in this repository.
   Fill every section that applies, delete the others, and say how the change was tested. An issue
