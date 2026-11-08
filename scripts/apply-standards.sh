@@ -1,8 +1,10 @@
 #!/bin/sh
 # Applies the repository settings a template cannot carry: merge options, security features (secret
-# scanning, push protection, private vulnerability reporting, Dependabot alerts) and the main
-# ruleset (.github/rulesets/main.json). Idempotent: run it once after "Use this template", and again
-# after editing the ruleset file.
+# scanning, push protection, private vulnerability reporting, Dependabot alerts) and every ruleset of
+# .github/rulesets/: "Protect main" (required checks, no bypass) and "Code owner review" (my approval on
+# any change to .github/, where the checks are defined; bypassed by the admin role in pull request mode
+# and the Renovate App). Idempotent: run it once after "Use this template", and again after editing a
+# ruleset file.
 #
 # Usage: scripts/apply-standards.sh owner/repo
 # Needs: gh, logged in as the repository owner (admin rights on the repository).
@@ -15,7 +17,7 @@
 set -eu
 
 REPO="${1:?usage: scripts/apply-standards.sh owner/repo}"
-RULESET_FILE="$(dirname "$0")/../.github/rulesets/main.json"
+RULESETS_DIR="$(dirname "$0")/../.github/rulesets"
 
 echo "Settings: squash only, branches deleted on merge, auto-merge allowed"
 gh api -X PATCH "repos/$REPO" \
@@ -37,14 +39,16 @@ gh api -X PUT "repos/$REPO/private-vulnerability-reporting" >/dev/null
 echo "Security: Dependabot alerts"
 gh api -X PUT "repos/$REPO/vulnerability-alerts" >/dev/null
 
-NAME="$(sed -n 's/.*"name": *"\([^"]*\)".*/\1/p' "$RULESET_FILE" | head -n 1)"
-ID="$(gh api "repos/$REPO/rulesets" --jq ".[] | select(.name == \"$NAME\") | .id")"
-if [ -n "$ID" ]; then
-    echo "Ruleset '$NAME': updating ($ID)"
-    gh api -X PUT "repos/$REPO/rulesets/$ID" --input "$RULESET_FILE" >/dev/null
-else
-    echo "Ruleset '$NAME': creating"
-    gh api -X POST "repos/$REPO/rulesets" --input "$RULESET_FILE" >/dev/null
-fi
+for RULESET_FILE in "$RULESETS_DIR"/*.json; do
+    NAME="$(sed -n 's/.*"name": *"\([^"]*\)".*/\1/p' "$RULESET_FILE" | head -n 1)"
+    ID="$(gh api "repos/$REPO/rulesets" --jq ".[] | select(.name == \"$NAME\") | .id")"
+    if [ -n "$ID" ]; then
+        echo "Ruleset '$NAME': updating ($ID)"
+        gh api -X PUT "repos/$REPO/rulesets/$ID" --input "$RULESET_FILE" >/dev/null
+    else
+        echo "Ruleset '$NAME': creating"
+        gh api -X POST "repos/$REPO/rulesets" --input "$RULESET_FILE" >/dev/null
+    fi
+done
 
 echo "Done. Left by hand: the project's CI job names in the ruleset file, then run this again."
