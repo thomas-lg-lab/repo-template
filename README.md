@@ -1,7 +1,7 @@
 # repo-template
 
 Template for new `thomas-lg-lab` repositories: exactly the files every repository of the organisation carries,
-ready from the first commit. Use it with **Use this template** on GitHub, or
+ready from the first commit. Create a repository from it with **Use this template** on GitHub, or
 `gh repo create thomas-lg-lab/<name> --template thomas-lg-lab/repo-template --public --clone`.
 
 The organisation drives the rest from [`thomas-lg-lab/.github`](https://github.com/thomas-lg-lab/.github): issue
