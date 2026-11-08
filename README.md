@@ -11,6 +11,7 @@ ready from the first commit. Use it with **Use this template** on GitHub, or
 | Branching | Trunk-based: short branches, squash PRs into `main` ([AGENTS.md](AGENTS.md)) |
 | Releases | release-drafter keeps a draft from PR labels; publishing it tags `vX.Y.Z` and builds `latest`; `main` builds `edge` |
 | PR hygiene | Conventional Commit titles enforced, labels from the type, PR template, CODEOWNERS |
+| Issues | Forms only (bug, feature, task) set the organisation's issue type; security reports go to private reporting |
 | Dependencies | Renovate through the central runner and shared preset of `thomas-lg-lab/renovate-config` (OSV security PRs, SHAs and digests pinned, 3-day release age) |
 | Image | `image.yml`: build on every PR, Trivy gate on fixable criticals, multi-arch push, build provenance attestation |
 | Supply chain | OpenSSF Scorecard (Security tab and badge), actions pinned to SHAs, `permissions` least-privilege |
@@ -25,7 +26,9 @@ ready from the first commit. Use it with **Use this template** on GitHub, or
 3. Add the project's CI (build, tests, lint) and its job names to `required_status_checks` in
    `.github/rulesets/main.json`, then run the script again. Delete `image.yml` (and `docker-build`
    from the ruleset) if the project ships no image.
-4. Replace this README, keep the badges:
+4. Adapt the bug form's version and environment fields (`.github/ISSUE_TEMPLATE/bug_report.yml`) to
+   the project if they do not fit.
+5. Replace this README, keep the badges:
 
 ```markdown
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/thomas-lg-lab/<name>/badge)](https://scorecard.dev/viewer/?uri=github.com/thomas-lg-lab/<name>)
