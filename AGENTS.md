@@ -9,10 +9,10 @@
   tag, from the draft release) builds `latest`.
 - **PR titles follow Conventional Commits** with a type from `.github/conventional-commit-types.json`
   (checked by CI, and the label and release notes come from it).
-- **Issues and PR descriptions** follow the forms in `.github/ISSUE_TEMPLATE/` and
-  `.github/pull_request_template.md`: fill every section that applies, delete the ones that do not,
-  and say how the change was tested. A PR that resolves an issue says `Closes #N`. An issue opened
-  through the API or `gh` skips the forms: use the same sections and set the issue type
+- **Issues and PR descriptions** follow the organisation's defaults in `thomas-lg-lab/.github`
+  (issue forms, PR template, and how to fill them in its README); they are not in this repository.
+  Fill every section that applies, delete the others, and say how the change was tested. An issue
+  opened through the API or `gh` skips the forms: use the same sections and set the issue type
   (`gh api repos/OWNER/REPO/issues -f title=... -f body=... -f type=Task`, or `Bug`, `Feature`).
 - **Dependencies** are updated by Renovate (shared config in `thomas-lg-lab/renovate-config`); do not
   bump them by hand in a feature PR. Security fixes arrive as `security` PRs at any time.
