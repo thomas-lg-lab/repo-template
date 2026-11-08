@@ -30,3 +30,4 @@ ready from the first commit. Use it with **Use this template** on GitHub, or
 ```markdown
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/thomas-lg-lab/<name>/badge)](https://scorecard.dev/viewer/?uri=github.com/thomas-lg-lab/<name>)
 ```
+
