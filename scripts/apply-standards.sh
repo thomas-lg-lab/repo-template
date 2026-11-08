@@ -7,10 +7,10 @@
 # Usage: scripts/apply-standards.sh owner/repo
 # Needs: gh, logged in as the repository owner (admin rights on the repository).
 #
-# Then, by hand (the API cannot do it for a personal account):
-#   - install the thomas-lg-renovate App on the repository (Settings > GitHub Apps), which enrols
-#     it in the central Renovate runner of thomas-lg-lab/renovate-config;
-#   - add the project's own CI job names to required_status_checks in the ruleset file.
+# Renovate needs nothing: the thomas-lg-renovate App is installed on every repository of the
+# thomas-lg-lab organisation, so the central runner of thomas-lg-lab/renovate-config picks the
+# new repository up on its next run.
+# Then, by hand: add the project's own CI job names to required_status_checks in the ruleset file.
 
 set -eu
 
@@ -47,4 +47,4 @@ else
     gh api -X POST "repos/$REPO/rulesets" --input "$RULESET_FILE" >/dev/null
 fi
 
-echo "Done. Left by hand: install the thomas-lg-renovate App on $REPO."
+echo "Done. Left by hand: the project's CI job names in the ruleset file, then run this again."

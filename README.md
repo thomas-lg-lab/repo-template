@@ -21,8 +21,8 @@ ready from the first commit. Use it with **Use this template** on GitHub, or
 1. `scripts/apply-standards.sh thomas-lg-lab/<name>`: merge settings, secret scanning, push protection
    and private vulnerability reporting, the `hermes-triage` topic (Hermes triages the repository's
    PRs), the main ruleset.
-2. Install the `thomas-lg-renovate` App on the repository (Settings → GitHub Apps → Configure): the
-   central runner picks it up on its next run.
+2. Nothing for Renovate: the `thomas-lg-renovate` App is installed on every repository of the
+   organisation, so the central runner picks the new one up on its next run.
 3. Add the project's CI (build, tests, lint) and its job names to `required_status_checks` in
    `.github/rulesets/main.json`, then run the script again. Delete `image.yml` (and `docker-build`
    from the ruleset) if the project ships no image.
