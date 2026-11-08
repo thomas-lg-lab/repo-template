@@ -19,6 +19,7 @@
 
 ## Checklist
 
+- [ ] Title is a [Conventional Commit](https://www.conventionalcommits.org/) with a type from `.github/conventional-commit-types.json` (`feat: add X`, `fix(api): correct Y`, `feat!: drop Z`): it becomes the squash commit, the label and the changelog line
 - [ ] Tests added or updated for new or changed behaviour
 - [ ] Docs updated if behaviour or configuration changed
 - [ ] No secret, credential or site-specific value in the diff, the commit messages or this description
