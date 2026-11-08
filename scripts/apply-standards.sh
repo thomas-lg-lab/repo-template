@@ -32,6 +32,11 @@ EOF
 echo "Security: private vulnerability reporting (the channel SECURITY.md points to)"
 gh api -X PUT "repos/$REPO/private-vulnerability-reporting" >/dev/null
 
+# Alerts only: Dependabot opens no PR (version and security updates stay off, Renovate does that).
+# The alerts feed Renovate's vulnerabilityAlerts and the Security tab (review of 8 November 2026).
+echo "Security: Dependabot alerts"
+gh api -X PUT "repos/$REPO/vulnerability-alerts" >/dev/null
+
 # Enrols the repository in Hermes' PR triage (pr-triage skill, homelab repository): on the personal
 # account only repositories with this topic are triaged. Remove it to opt out.
 echo "Topic: hermes-triage"
