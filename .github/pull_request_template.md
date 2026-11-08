@@ -1,6 +1,3 @@
-<!-- Title: Conventional Commit, `type(scope): summary` (checked by CI; the label and release notes come from it).
-     Add `!` after the type for a breaking change. -->
-
 ## Why
 
 <!-- The problem or the goal. Link the issue below rather than repeating it. -->
