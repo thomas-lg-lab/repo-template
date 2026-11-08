@@ -14,7 +14,7 @@ ready from the first commit. Use it with **Use this template** on GitHub, or
 | Dependencies | Renovate through the central runner and shared preset of `thomas-lg-lab/renovate-config` (OSV security PRs, SHAs and digests pinned, 3-day release age) |
 | Image | `image.yml`: build on every PR, Trivy gate on fixable criticals, multi-arch push, build provenance attestation |
 | Supply chain | OpenSSF Scorecard (Security tab and badge), actions pinned to SHAs, `permissions` least-privilege |
-| Protection | `.github/rulesets/main.json`: squash only, linear history, signed commits, required checks, no bypass |
+| Protection | `.github/rulesets/main.json`: squash only, linear history, signed commits, required checks, no bypass. `.github/rulesets/code-owner-review.json` + `CODEOWNERS`: a change to `.github/` (the checks themselves) needs my approval |
 
 ## After creating a repository from it
 
